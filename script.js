@@ -4,26 +4,41 @@ const lista = document.getElementById("listaTarefas");
 const total = document.getElementById("total");
 
 function atualizarTotal() {
-  total.textContent = "Total: " + lista.children.length;
+  const quantidade = lista.children.length;
+  const feitas = lista.querySelectorAll(".feita").length;
+
+  total.textContent = "Total: " + quantidade + " (" + feitas + " feitas)";
 }
 
 function salvar() {
-  const textos = [];
+  const tarefas = [];
   const spans = lista.querySelectorAll("li span");
 
   spans.forEach(function (span) {
-    textos.push(span.textContent);
+    tarefas.push({
+      texto: span.textContent,
+      feita: span.classList.contains("feita")
+    });
   });
 
-  localStorage.setItem("tarefas", JSON.stringify(textos));
+  localStorage.setItem("tarefas", JSON.stringify(tarefas));
   atualizarTotal();
 }
 
-function criarItem(texto) {
+function criarItem(texto, feita) {
   const item = document.createElement("li");
 
   const span = document.createElement("span");
   span.textContent = texto;
+
+  if (feita) {
+    span.classList.add("feita");
+  }
+
+  span.addEventListener("click", function () {
+    span.classList.toggle("feita");
+    salvar();
+  });
 
   const botaoCorrigir = document.createElement("button");
   botaoCorrigir.textContent = "Corrigir";
@@ -58,7 +73,7 @@ function adicionarTarefa() {
     return;
   }
 
-  criarItem(texto);
+  criarItem(texto, false);
   salvar();
   campo.value = "";
 }
@@ -71,14 +86,21 @@ campo.addEventListener("keydown", function (evento) {
   }
 });
 
-const tarefasSalvas = JSON.parse(localStorage.getItem("tarefas")) || [];
-
-tarefasSalvas.forEach(function (texto) {
-  criarItem(texto);
-});
 const botaoLimpar = document.getElementById("botaoLimpar");
 
 botaoLimpar.addEventListener("click", function () {
   lista.innerHTML = "";
   salvar();
 });
+
+const tarefasSalvas = JSON.parse(localStorage.getItem("tarefas")) || [];
+
+tarefasSalvas.forEach(function (tarefa) {
+  if (typeof tarefa === "string") {
+    criarItem(tarefa, false);
+  } else {
+    criarItem(tarefa.texto, tarefa.feita);
+  }
+});
+
+atualizarTotal();
