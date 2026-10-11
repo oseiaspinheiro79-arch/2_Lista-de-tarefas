@@ -25,8 +25,16 @@ function adicionarTarefa() {
     }
   });
 
+  const botaoRemover = document.createElement("button");
+  botaoRemover.textContent = "Remover";
+
+  botaoRemover.addEventListener("click", function () {
+    item.remove();
+  });
+
   item.appendChild(span);
   item.appendChild(botaoCorrigir);
+  item.appendChild(botaoRemover);
   lista.appendChild(item);
 
   campo.value = "";
